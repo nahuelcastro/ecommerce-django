@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+{% load static %}
+<html>
+<head>
+    <title>ecommerce</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+
+    <script type="text/javascript">
+        let user = '{{ request.user }}';
+
+        function getToken(name){
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                let cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    let cookie = cookies[i].trim();
+                    // Does this cookie string begin with the name we want?
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        let csrftoken = getToken('csrftoken');
+        {% comment %} console.log(csrftoken); {% endcomment %}
+
+        function getCookie(name){
+            // Split cookie string and get all individual name=value pairs in an array
+            let coockieArr = document.cookie.split(';');
+            console.log(coockieArr);
+
+            // Loop through the array elements
+            for(let i=0; i<coockieArr.length; i++){
+                let cookiePair = coockieArr[i];
+
+                //Removing whitespace at the beginning of the cookie name and compare it with the given string
+                if(cookiePair[0] != undefined){
+                    if (name == cookiePair[0].trim()){
+                    // Decocde the the cookie value and return
+                    return decodeURIComponent(cookiePair[1]);
+                    }
+                }
+            }
+            // Return null if not found
+            return null; 
+        }
+
+        let cart = JSON.parse(getCookie('cart'));
+        if (cart == undefined){
+            cart = {};
+            console.log('Cart cookie was created!');
+            document.cookie = 'cart=' + JSON.stringify(cart) + ";domain=path=/"
+        }
+
+    </script>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand"  href="{% url 'store' %}">ecomm</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+            <a class="nav-link active" aria-current="store"  href="{% url 'store' %}">Store</a>
+            </li>
+        </ul>
+        {% comment %} <div class="form-inline my-2 my-lg-0"> {% endcomment %}
+        {% if user.is_authenticated %}
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="store"  href="{% url 'store' %}">{{user.customer.name}}</a>
+                </li>
+            </ul>   
+            {% comment %} <a class="btn btn-outline-success my-2 my-sm-0" href="{% url 'logout' %}">Logout</a> {% endcomment %}
+            <a class="btn btn-outline-success my-2 my-sm-0" href="#">Logout</a>
+        {% else %}
+        <a href="#" class="btn btn-warning  m-1">Login</a>
+        
+        <a href="#" class="btn btn-success  m-1">Signup</a>
+        {% endif %}
+        {% comment %} </div> {% endcomment %}
+        <a href="{% url 'cart' %}">
+            <img id="cart-icon" src="{% static 'images/cart.png' %}" alt="cart" >
+        </a>
+        <p id="cart-total">{{order.get_cart_items}}</p>
+        {% comment %} </div> {% endcomment %}
+    </div>
+    </nav>
+
+    <div class="container">    
+        {% block content %}
+
+        {% endblock content %}
+    </div>
+    
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="{% static 'js/cart.js' %}"></script>
+</body>
+</html>
